@@ -5,7 +5,6 @@ import {
   Select,
   MenuItem,
   Box,
-  Typography,
   SelectChangeEvent,
   Stack,
 } from "@mui/material";
@@ -331,11 +330,6 @@ export default function FirmwareSelector({
           </Select>
         </FormControl>
       </Stack>
-      {selectedFile && (
-        <Typography variant="body2" sx={{ mt: 1, color: "text.secondary" }}>
-          Selected: {selectedFile.filename}
-        </Typography>
-      )}
     </Box>
   );
 }

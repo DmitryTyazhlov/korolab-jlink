@@ -25,10 +25,6 @@ function App() {
         firmwareFiles={DEMO_FIRMWARE_FILES}
         onSelectionChange={(firmware) => setSelectedFirmware(firmware)}
       />
-
-      {selectedFirmware && (
-        <p>Selected firmware: {selectedFirmware.filename}</p>
-      )}
     </main>
   );
 }
