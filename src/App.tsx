@@ -9,6 +9,7 @@ const DEMO_FIRMWARE_FILES = [
   "di4la-2-2_0-1_x-gd32f330k8u6.hex",
   "dila-4-1_12-1_x-gd32f330c8t6.hex",
   "di4la-4-1_11-2_x-gd32f330c8t6.hex",
+  "stlink-1-1_5-1_x-stm32f103c8.hex",
   "stlink-1-1_5-1_x-stm32f103c8t6.hex",
   "stlink-1-1_5-1_x-stm32f103c8t6.hex",
   "stlink-1-1_5-3_x-stm32f103c8t6.hex",
