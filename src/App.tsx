@@ -8,7 +8,6 @@ import {
   FormLabel,
   Typography,
   TextField,
-  Stack,
   IconButton,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -23,8 +22,6 @@ const DEMO_FIRMWARE_FILES = [""];
 function App() {
   const [selectedFirmware, setSelectedFirmware] = useState<FirmwareFile | null>(null);
   const [connectionType, setConnectionType] = useState("usb");
-  const [ip3, setIp3] = useState("");
-  const [ip4, setIp4] = useState("");
   const [remoteId, setRemoteId] = useState("");
   const [firmwarePath, setFirmwarePath] = useState<string | null>(null);
   const [firmwareFiles, setFirmwareFiles] = useState<string[]>(DEMO_FIRMWARE_FILES);
@@ -35,9 +32,9 @@ function App() {
   const connectionParams = useMemo(() => ({
     connection_type: connectionType,
     device: mcuDevice ?? "",
-    ip: connectionType === "local" ? `192.168.${ip3}.${ip4}` : null,
+    ip: connectionType === "local" ? `192.168.88.88` : null,
     remote_id: connectionType === "remote" ? remoteId : null,
-  }), [connectionType, mcuDevice, ip3, ip4, remoteId]);
+  }), [connectionType, mcuDevice, remoteId]);
 
   const handleSelectFolder = useCallback(async () => {
     try {
@@ -101,55 +98,10 @@ function App() {
             <FormControlLabel
               value="local"
               control={<Radio size="small" />}
-              label={<Typography sx={{ fontSize: "0.8rem" }}>Local</Typography>}
-            />
-            <FormControlLabel
-              value="remote"
-              control={<Radio size="small" />}
-              label={<Typography sx={{ fontSize: "0.8rem" }}>Remote</Typography>}
+              label={<Typography sx={{ fontSize: "0.8rem" }}>RaspberryPi (192.168.88.88)</Typography>}
             />
           </RadioGroup>
         </FormControl>
-
-        {/* Local IP fields */}
-        {connectionType === "local" && (
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center", ml: 1, mt: 0.5 }}>
-            <Typography sx={{ fontSize: "0.8rem", color: "#9e9e9e" }}>
-              192.168.
-            </Typography>
-            <TextField
-              variant="standard"
-              value={ip3}
-              onChange={(e) =>
-                setIp3(e.target.value.replace(/\D/g, "").slice(0, 3))
-              }
-              sx={{ width: 40 }}
-              slotProps={{
-                htmlInput: {
-                  style: { fontSize: "0.85rem", textAlign: "center", padding: "2px 0" },
-                  maxLength: 3,
-                },
-              }}
-            />
-            <Typography sx={{ fontSize: "0.8rem", color: "#9e9e9e" }}>
-              .
-            </Typography>
-            <TextField
-              variant="standard"
-              value={ip4}
-              onChange={(e) =>
-                setIp4(e.target.value.replace(/\D/g, "").slice(0, 3))
-              }
-              sx={{ width: 40 }}
-              slotProps={{
-                htmlInput: {
-                  style: { fontSize: "0.85rem", textAlign: "center", padding: "2px 0" },
-                  maxLength: 3,
-                },
-              }}
-            />
-          </Stack>
-        )}
 
         {/* Remote ID field */}
         {connectionType === "remote" && (
