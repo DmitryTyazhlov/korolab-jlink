@@ -13,8 +13,10 @@
     "windows": [
       {
         "title": "korolab-jlink",
-        "width": 300,
-        "height": 600
+        "width": 400,
+        "height": 700,
+        "minWidth": 400,
+        "minHeight": 700
       }
     ],
     "security": {

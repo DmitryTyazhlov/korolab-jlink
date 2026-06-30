@@ -192,6 +192,37 @@ async fn select_firmware_file(app: tauri::AppHandle) -> Result<Option<String>, S
     }
 }
 
+#[tauri::command]
+async fn select_firmware_folder(app: tauri::AppHandle) -> Result<Option<String>, String> {
+    use tauri_plugin_dialog::DialogExt;
+    let folder = app
+        .dialog()
+        .file()
+        .blocking_pick_folder();
+
+    match folder {
+        Some(path) => Ok(Some(path.to_string())),
+        None => Ok(None),
+    }
+}
+
+#[tauri::command]
+async fn list_hex_files(path: String) -> Result<Vec<String>, String> {
+    let dir = std::fs::read_dir(&path)
+        .map_err(|e| format!("Failed to read directory: {}", e))?;
+
+    let mut result = Vec::new();
+    for entry in dir {
+        let entry = entry.map_err(|e| format!("Failed to read entry: {}", e))?;
+        let file_name = entry.file_name().to_string_lossy().to_string();
+        if file_name.to_lowercase().ends_with(".hex") {
+            result.push(file_name);
+        }
+    }
+    result.sort();
+    Ok(result)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // Поиск JLink выполняется один раз при запуске программы
@@ -208,7 +239,9 @@ pub fn run() {
             jlink_program,
             jlink_execute_commands,
             jlink_is_installed,
-            select_firmware_file
+            select_firmware_file,
+            select_firmware_folder,
+            list_hex_files
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
