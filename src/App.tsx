@@ -83,7 +83,7 @@ function App() {
       </Box>
 
       {/* Connection */}
-      <Box sx={{ px: 1, pt: 1 }}>
+      <Box sx={{ px: 1, pt: 1, flexShrink: 0 }}>
         <FormControl>
           <FormLabel sx={{ fontSize: "0.8rem", color: "#9e9e9e" }}>
             Connection
@@ -170,15 +170,21 @@ function App() {
         )}
       </Box>
 
-      <FirmwareSelector
-        firmwareFiles={firmwareFiles}
-        onSelectionChange={(firmware) => setSelectedFirmware(firmware)}
-      />
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <Box sx={{ flexShrink: 0 }}>
+          <FirmwareSelector
+            firmwareFiles={firmwareFiles}
+            onSelectionChange={(firmware) => setSelectedFirmware(firmware)}
+          />
+        </Box>
 
-      <JLinkActions
-        connectionParams={connectionParams}
-        firmwarePath={fullFirmwarePath}
-      />
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <JLinkActions
+            connectionParams={connectionParams}
+            firmwarePath={fullFirmwarePath}
+          />
+        </Box>
+      </Box>
     </main>
   );
 }

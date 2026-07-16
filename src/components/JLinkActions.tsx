@@ -154,8 +154,8 @@ export default function JLinkActions({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-      <Stack spacing={2} direction="column" sx={{ width: "100%", flexShrink: 0 }}>
-        {/* Action Buttons */}
+      {/* Action Buttons */}
+      <Box sx={{ flexShrink: 0, mb: 1 }}>
         <Stack direction="row" spacing={1}>
           <Button
             variant="contained"
@@ -192,7 +192,7 @@ export default function JLinkActions({
         </Stack>
 
         {/* Progress bar */}
-        {busy && <LinearProgress sx={{ height: 2 }} />}
+        {busy && <LinearProgress sx={{ height: 2, mt: 1 }} />}
 
         {/* Status */}
         {status && (
@@ -200,52 +200,59 @@ export default function JLinkActions({
             sx={{
               fontSize: "0.75rem",
               color: status.includes("fail") ? "#f97583" : "#7ee787",
+              mt: 0.5,
             }}
           >
             {status}
           </Typography>
         )}
+      </Box>
 
-        {/* Output */}
-        <Paper
-          variant="outlined"
+      {/* Output */}
+      <Paper
+        variant="outlined"
+        sx={{
+          backgroundColor: "#0d1117",
+          borderColor: "#30363d",
+          borderRadius: 1,
+          position: "relative",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        }}
+      >
+        <Box
           sx={{
-            backgroundColor: "#0d1117",
-            borderColor: "#30363d",
-            borderRadius: 1,
-            position: "relative",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 1,
+            py: 0.5,
+            borderBottom: "1px solid #30363d",
+            flexShrink: 0,
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              px: 1,
-              py: 0.5,
-              borderBottom: "1px solid #30363d",
-            }}
-          >
-            <IconButton size="small" onClick={handleClearOutput} sx={{ color: "#8b949e", p: 0.3 }}>
-              <Typography sx={{ fontSize: "0.7rem" }}>clear</Typography>
-            </IconButton>
-          </Box>
-          <Box
-            ref={outputRef}
-            sx={{
-              height: 200,
-              overflowY: "auto",
-              p: 1,
-              "& > div": {
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
-                fontSize: "12px",
-                lineHeight: 1.5,
-                padding: "1px 0",
-              },
-            }}
-          />
-        </Paper>
-      </Stack>
+          <IconButton size="small" onClick={handleClearOutput} sx={{ color: "#8b949e", p: 0.3 }}>
+            <Typography sx={{ fontSize: "0.7rem" }}>clear</Typography>
+          </IconButton>
+        </Box>
+        <Box
+          ref={outputRef}
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            p: 1,
+            minHeight: 0,
+            "& > div": {
+              fontFamily: "'SF Mono', 'Fira Code', monospace",
+              fontSize: "12px",
+              lineHeight: 1.5,
+              padding: "1px 0",
+            },
+          }}
+        />
+      </Paper>
     </Box>
   );
 }
