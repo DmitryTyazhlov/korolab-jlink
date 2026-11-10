@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Box,
   Radio,
@@ -20,6 +20,8 @@ import { invoke } from "@tauri-apps/api/core";
 // Demo firmware files when no folder is selected
 const DEMO_FIRMWARE_FILES = [""];
 
+const FOLDER_STORAGE_KEY = "firmwareFolder";
+
 function App() {
   const [selectedFirmware, setSelectedFirmware] = useState<FirmwareFile | null>(null);
   const [connectionType, setConnectionType] = useState("usb");
@@ -39,22 +41,34 @@ function App() {
     remote_id: connectionType === "remote" ? remoteId : null,
   }), [connectionType, mcuDevice, ip3, ip4, remoteId]);
 
+  const loadFolder = useCallback(async (folder: string) => {
+    const files = await invoke<string[]>("list_hex_files", { path: folder });
+    setFirmwarePath(folder);
+    setFirmwareFiles(files);
+  }, []);
+
+  // Restore the last used folder on startup
+  useEffect(() => {
+    const saved = localStorage.getItem(FOLDER_STORAGE_KEY);
+    if (saved) {
+      loadFolder(saved).catch(() => {
+        // folder no longer exists or is unreadable
+        localStorage.removeItem(FOLDER_STORAGE_KEY);
+      });
+    }
+  }, [loadFolder]);
+
   const handleSelectFolder = useCallback(async () => {
     try {
       const folder = await invoke<string | null>("select_firmware_folder");
       if (folder) {
-        setFirmwarePath(folder);
-        const files = await invoke<string[]>("list_hex_files", { path: folder });
-        if (files.length > 0) {
-          setFirmwareFiles(files);
-        } else {
-          setFirmwareFiles([]);
-        }
+        await loadFolder(folder);
+        localStorage.setItem(FOLDER_STORAGE_KEY, folder);
       }
     } catch (e) {
       // ignored
     }
-  }, []);
+  }, [loadFolder]);
 
   // Build full firmware path when both folder and selected firmware are known
   const fullFirmwarePath = useMemo(() => {

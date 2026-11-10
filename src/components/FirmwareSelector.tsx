@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 
 // Format: di4la-3-1_12-1_x-gd32f330k8u6.hex
+// Firmware without DFU has 4 parts: leak_sensor-3-1_1-gd32f330k8u6.hex
 // Parts split by "-":
 //   0: device name (di4la)
 //   1: board version (3)
@@ -26,9 +27,22 @@ export interface FirmwareFile {
   mcu: string;
 }
 
+// Sentinel DFU version for firmware files that have no DFU part
+const NO_DFU = "none";
+
 function parseFirmwareFilename(filename: string): FirmwareFile | null {
   const name = filename.replace(/\.hex$/i, "");
   const parts = name.split("-");
+  if (parts.length === 4) {
+    return {
+      filename,
+      device: parts[0],
+      boardVersion: parts[1],
+      firmwareVersion: parts[2],
+      dfuVersion: NO_DFU,
+      mcu: parts[3],
+    };
+  }
   if (parts.length !== 5) return null;
   return {
     filename,
@@ -41,6 +55,7 @@ function parseFirmwareFilename(filename: string): FirmwareFile | null {
 }
 
 function displayVersion(raw: string): string {
+  if (raw === NO_DFU) return "No DFU";
   return raw.replace("_", ".");
 }
 
