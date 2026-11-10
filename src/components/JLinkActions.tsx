@@ -3,13 +3,9 @@ import {
   Box,
   Button,
   Stack,
-  Typography,
   Paper,
-  IconButton,
   LinearProgress,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
@@ -53,10 +49,8 @@ export default function JLinkActions({
   connectionParams,
   firmwarePath,
 }: JLinkActionsProps) {
-  const [status, setStatus] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const outputRef = useRef<HTMLDivElement>(null);
-  const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const device = connectionParams.device;
 
@@ -93,6 +87,7 @@ export default function JLinkActions({
   );
 
   const handleErase = useCallback(async () => {
+    if (busy) return;
     if (!device) {
       appendToOutput('<span style="color: #f97583">Error: No device selected</span>');
       return;
@@ -104,19 +99,16 @@ export default function JLinkActions({
         connectionParams,
       });
       appendToOutput(`Erase finished with code ${result.code}`);
-      setStatus("Erase completed");
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error);
       appendToOutput(`<span style="color: #f97583">Error: ${msg}</span>`);
-      setStatus("Erase failed");
     } finally {
       setBusy(false);
-      if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
-      statusTimeoutRef.current = setTimeout(() => setStatus(""), 3000);
     }
-  }, [device, appendToOutput, invokeJLinkCommand, connectionParams]);
+  }, [busy, device, appendToOutput, invokeJLinkCommand, connectionParams]);
 
   const handleProgram = useCallback(async () => {
+    if (busy) return;
     if (!device) {
       appendToOutput('<span style="color: #f97583">Error: No device selected</span>');
       return;
@@ -134,41 +126,36 @@ export default function JLinkActions({
         connectionParams,
       });
       appendToOutput(`Flash finished with code ${result.code}`);
-      setStatus("Program completed");
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error);
       appendToOutput(`<span style="color: #f97583">Error: ${msg}</span>`);
-      setStatus("Program failed");
     } finally {
       setBusy(false);
-      if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
-      statusTimeoutRef.current = setTimeout(() => setStatus(""), 3000);
     }
-  }, [device, firmwarePath, appendToOutput, invokeJLinkCommand, connectionParams]);
-
-  const handleClearOutput = useCallback(() => {
-    if (outputRef.current) {
-      outputRef.current.innerHTML = "";
-    }
-  }, []);
+  }, [busy, device, firmwarePath, appendToOutput, invokeJLinkCommand, connectionParams]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-      <Stack spacing={2} direction="column" sx={{ width: "100%", flexShrink: 0 }}>
-        {/* Action Buttons */}
-        <Stack direction="row" spacing={1}>
+      {/* Action Buttons */}
+      <Box sx={{ flexShrink: 0, mb: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ ml: 1 }}>
           <Button
             variant="contained"
             size="small"
-            startIcon={<DeleteIcon />}
             onClick={handleErase}
-            disabled={busy || !device}
+            disabled={!device}
             sx={{
               fontSize: "0.8rem",
               textTransform: "none",
-              backgroundColor: "#da3633",
-              "&:hover": { backgroundColor: "#b62324" },
-              "&.Mui-disabled": { backgroundColor: "#3d1f1f" },
+              backgroundColor: "#b05555",
+              "&:hover": { backgroundColor: "#c46666" },
+              "&.Mui-disabled": { backgroundColor: "#2e2222" },
+              boxShadow: "none",
+              opacity: busy ? 0.6 : 1,
+              "&:focus, &.Mui-focusVisible": {
+                outline: "2px solid #ff7b72",
+                outlineOffset: "2px",
+              },
             }}
           >
             Erase
@@ -176,15 +163,19 @@ export default function JLinkActions({
           <Button
             variant="contained"
             size="small"
-            startIcon={<PlayArrowIcon />}
             onClick={handleProgram}
-            disabled={busy || !device || !firmwarePath}
+            disabled={!device || !firmwarePath}
             sx={{
               fontSize: "0.8rem",
               textTransform: "none",
-              backgroundColor: "#238636",
-              "&:hover": { backgroundColor: "#2ea043" },
-              "&.Mui-disabled": { backgroundColor: "#1a3a1a" },
+              backgroundColor: "#3f9150",
+              "&:hover": { backgroundColor: "#4fa761" },
+              "&.Mui-disabled": { backgroundColor: "#222e25" },
+              opacity: busy ? 0.6 : 1,
+              "&:focus, &.Mui-focusVisible": {
+                outline: "2px solid #7ee787",
+                outlineOffset: "2px",
+              },
             }}
           >
             Program
@@ -192,60 +183,40 @@ export default function JLinkActions({
         </Stack>
 
         {/* Progress bar */}
-        {busy && <LinearProgress sx={{ height: 2 }} />}
+        {busy && <LinearProgress sx={{ height: 2, mt: 1 }} />}
+      </Box>
 
-        {/* Status */}
-        {status && (
-          <Typography
-            sx={{
-              fontSize: "0.75rem",
-              color: status.includes("fail") ? "#f97583" : "#7ee787",
-            }}
-          >
-            {status}
-          </Typography>
-        )}
-
-        {/* Output */}
-        <Paper
-          variant="outlined"
+      {/* Output */}
+      <Paper
+        variant="outlined"
+        sx={{
+          backgroundColor: "#2b2b2b",
+          borderColor: "#1a1a1a",
+          borderWidth: "10px",
+          borderRadius: 2,
+          position: "relative",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        }}
+      >
+        <Box
+          ref={outputRef}
           sx={{
-            backgroundColor: "#0d1117",
-            borderColor: "#30363d",
-            borderRadius: 1,
-            position: "relative",
+            flex: 1,
+            overflowY: "auto",
+            p: 1,
+            minHeight: 0,
+            "& > div": {
+              fontFamily: "'SF Mono', 'Fira Code', monospace",
+              fontSize: "12px",
+              lineHeight: 1.5,
+              padding: "1px 0",
+            },
           }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              px: 1,
-              py: 0.5,
-              borderBottom: "1px solid #30363d",
-            }}
-          >
-            <IconButton size="small" onClick={handleClearOutput} sx={{ color: "#8b949e", p: 0.3 }}>
-              <Typography sx={{ fontSize: "0.7rem" }}>clear</Typography>
-            </IconButton>
-          </Box>
-          <Box
-            ref={outputRef}
-            sx={{
-              height: 200,
-              overflowY: "auto",
-              p: 1,
-              "& > div": {
-                fontFamily: "'SF Mono', 'Fira Code', monospace",
-                fontSize: "12px",
-                lineHeight: 1.5,
-                padding: "1px 0",
-              },
-            }}
-          />
-        </Paper>
-      </Stack>
+        />
+      </Paper>
     </Box>
   );
 }
